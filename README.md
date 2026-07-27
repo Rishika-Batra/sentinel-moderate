@@ -40,7 +40,7 @@ graph TD
     Lambda -- "7. Updates state" --> Mongo
     Lambda -- "8. Publish high-severity alert" --> SNS
     SNS -- "9. Notify via Email" --> Alerts
-    Admin -- "10. Review flagged items" -.-> Mongo
+    Admin -. "10. Review flagged items" .-> Mongo
 ```
 
 ### Data Flow
