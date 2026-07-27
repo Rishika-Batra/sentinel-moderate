@@ -18,10 +18,10 @@
     @apply bg-ts-surface border border-ts-border rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.3)];
   }
   .ts-input {
-    @apply w-full bg-ts-input-bg border border-ts-border rounded-lg px-4 py-2 text-ts-textMain placeholder-ts-text-placeholder focus:outline-none focus:border-ts-accent focus:ring-1 focus:ring-ts-accent transition-colors duration-150;
+    @apply w-full bg-ts-inputBg border border-ts-border rounded-lg px-4 py-2 text-ts-textMain placeholder-ts-textPlaceholder focus:outline-none focus:border-ts-accent focus:ring-1 focus:ring-ts-accent transition-colors duration-150;
   }
   .ts-label {
-    @apply block text-[11px] font-medium text-ts-text-muted uppercase tracking-wider mb-2;
+    @apply block text-[11px] font-medium text-ts-textMuted uppercase tracking-wider mb-2;
   }
   .ts-button-primary {
     @apply bg-ts-accent text-white font-medium rounded-lg px-6 py-2.5 transition-all duration-150 hover:brightness-110 active:scale-[0.98];
