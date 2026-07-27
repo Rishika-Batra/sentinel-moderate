@@ -1,0 +1,21 @@
+{
+  "name": "lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda functions for AI Content Moderation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "zip": "npm run build && cd dist && zip -r ../function.zip . && cd .. && npm install --production && cp -r node_modules dist/ && cd dist && zip -r ../function.zip node_modules && cd .."
+  },
+  "dependencies": {
+    "@aws-sdk/client-comprehend": "^3.0.0",
+    "@aws-sdk/client-rekognition": "^3.0.0",
+    "@aws-sdk/client-sns": "^3.1095.0",
+    "mongodb": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.3"
+  }
+}

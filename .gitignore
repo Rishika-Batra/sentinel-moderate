@@ -1,0 +1,56 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# build
+dist/
+build/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+*.log
+logs/
+
+# env
+.env
+.env.*
+.env.tmp
+!.env.example
+
+# mac
+.DS_Store
+
+# vscode
+.vscode/
+
+# cache
+.cache/
+coverage
+*.tsbuildinfo
+
+# IDE
+.idea/
+
+# generated
+*.zip
+
+# terraform / infra state (never commit — can contain secrets)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# AWS SAM / lambda build artifacts
+.aws-sam/
+**/lambda/**/node_modules/
+**/lambda/**/*.zip
+
+# editor temp files
+*.swp
+*~
+
+# windows
+Thumbs.db
