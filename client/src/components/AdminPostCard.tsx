@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 
 interface AdminPostCardProps {
   post: any;

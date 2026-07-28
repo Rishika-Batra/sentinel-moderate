@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
@@ -22,7 +23,7 @@ const AdminAnalytics = () => {
           navigate('/admin/login');
           return;
         }
-        const res = await axios.get('http://localhost:5050/api/admin/analytics', {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/analytics`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setData(res.data);

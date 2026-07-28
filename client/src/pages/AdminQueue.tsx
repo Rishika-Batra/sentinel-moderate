@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import AdminPostCard from '../components/AdminPostCard';
 
@@ -17,7 +18,7 @@ const AdminQueue = () => {
         return;
       }
 
-      const res = await axios.get('http://localhost:5050/api/admin/queue', {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/queue`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setQueue(res.data.queue);

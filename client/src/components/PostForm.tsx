@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 import { UploadCloud, Image as ImageIcon, X } from 'lucide-react';
 
 interface PostFormProps {
@@ -30,7 +31,7 @@ export default function PostForm({ onPostCreated }: PostFormProps) {
         formData.append('image', image);
       }
       
-      await axios.post('http://localhost:5050/api/posts', formData, {
+      await axios.post(`${API_BASE_URL}/api/posts`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

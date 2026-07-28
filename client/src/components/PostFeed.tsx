@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 import { Clock } from 'lucide-react';
 
 interface Post {
@@ -28,7 +29,7 @@ export default function PostFeed({ refreshTrigger }: PostFeedProps) {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5050/api/posts');
+      const response = await axios.get(`${API_BASE_URL}/api/posts`);
       setPosts(response.data.posts);
       setError('');
     } catch (err) {
