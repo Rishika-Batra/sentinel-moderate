@@ -14,7 +14,7 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
   const handleAction = async (action: 'approve' | 'remove') => {
     try {
       await axios.patch(
-        `http://localhost:5050/api/admin/posts/${post._id}`,
+        `${API_BASE_URL}/api/admin/posts/${post._id}`,
         { action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
