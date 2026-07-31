@@ -6,46 +6,41 @@ import { v4 as uuidv4 } from 'uuid';
 import { s3Client, sqsClient, BUCKET_NAME, SQS_QUEUE_URL } from '../aws';
 import { Post } from '../models/Post';
 import { processMockMessage } from '../mock-sqs-processor';
+import { requireAuth, requireAdmin, AuthedRequest } from '../middleware/auth';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// POST /api/posts
-router.post('/', upload.single('image'), async (req, res) => {
+// POST /api/posts — requires login, userId always comes from the verified session
+router.post('/', requireAuth, upload.single('image'), async (req: AuthedRequest, res) => {
   try {
-    const { text, userId } = req.body;
+    const { text } = req.body;
     let imageUrl = undefined;
-
-    // Handle image upload to S3 if present
     let key: string | undefined = undefined;
+
     if (req.file) {
       const fileExtension = req.file.originalname.split('.').pop();
       key = `uploads/${uuidv4()}.${fileExtension}`;
-
       const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
         Body: req.file.buffer,
         ContentType: req.file.mimetype,
       });
-
       await s3Client.send(command);
-      
+
       const region = process.env.AWS_REGION || 'ap-south-1';
       imageUrl = `https://${BUCKET_NAME}.s3.${region}.amazonaws.com/${key}`;
     }
 
-    // Save post to MongoDB
     const post = new Post({
-      userId: userId || 'anonymous', // Default for now
+      userId: req.userId,
       text,
       imageUrl,
       status: 'pending'
     });
-
     await post.save();
-    
-    // Push message to SQS Queue
+
     const messageBody = JSON.stringify({
       postId: post._id,
       hasImage: !!imageUrl,
@@ -57,7 +52,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     if (process.env.USE_MOCK_SQS === 'true') {
       console.log('Sending message to Mock SQS Processor:', messageBody);
-      // Process asynchronously without awaiting so response returns immediately
       processMockMessage(messageBody).catch(console.error);
     } else {
       console.log(`Sending message to real SQS Queue: ${SQS_QUEUE_URL}`);
@@ -74,19 +68,18 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// GET /api/posts
-router.get('/', async (req, res) => {
+// GET /api/posts — logged-in user's OWN submissions only
+router.get('/', requireAuth, async (req: AuthedRequest, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    const posts = await Post.find({ userId: req.userId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
-    const total = await Post.countDocuments();
+    const total = await Post.countDocuments({ userId: req.userId });
 
     return res.json({
       posts,
@@ -96,6 +89,31 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching posts:', error);
+    return res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+// GET /api/posts/all — admin-only, sees every submission
+router.get('/all', requireAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await Post.countDocuments();
+
+    return res.json({
+      posts,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalPosts: total
+    });
+  } catch (error) {
+    console.error('Error fetching all posts:', error);
     return res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
