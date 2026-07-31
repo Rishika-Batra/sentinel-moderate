@@ -61,8 +61,8 @@ export default function PostForm({ onPostCreated }: PostFormProps) {
   };
 
   return (
-    <div className="ts-card p-6">
-      <h2 className="text-lg font-semibold mb-6">Create New Post</h2>
+    <div className="ts-card p-5">
+      <h2 className="text-lg font-semibold text-ts-textMain mb-6">Create New Post</h2>
       
       {error && (
         <div className="bg-red-900/20 py-3 px-4 rounded-lg border border-red-500/30 w-full mb-6">
@@ -94,27 +94,27 @@ export default function PostForm({ onPostCreated }: PostFormProps) {
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="text-center">
-                <UploadCloud className="mx-auto h-8 w-8 text-ts-text-muted mb-3" />
-                <div className="mt-2 flex justify-center text-sm leading-6 text-ts-text-muted">
+                <UploadCloud className="mx-auto h-8 w-8 text-ts-accent mb-3" />
+                <div className="mt-2 flex justify-center text-sm leading-6 text-ts-textMuted">
                   <span className="relative rounded-md font-medium text-ts-accent hover:text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-ts-accent">
                     <span>Upload a file</span>
                     <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" ref={fileInputRef} onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)} />
                   </span>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs leading-5 text-ts-text-placeholder mt-1">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs leading-5 text-ts-textPlaceholder mt-1">PNG, JPG, GIF up to 10MB</p>
               </div>
             </div>
           ) : (
-            <div className="mt-2 flex items-center justify-between p-3 border border-ts-border rounded-lg bg-ts-input-bg">
+            <div className="mt-2 flex items-center justify-between p-3 border border-ts-border rounded-lg bg-ts-inputBg">
               <div className="flex items-center space-x-3">
                 <ImageIcon className="w-5 h-5 text-ts-accent" />
-                <span className="text-sm text-ts-text-main">{image.name}</span>
+                <span className="text-sm text-ts-textMain">{image.name}</span>
               </div>
               <button 
                 type="button" 
                 onClick={() => setImage(null)}
-                className="text-ts-text-muted hover:text-white p-1 rounded-md transition-colors"
+                className="text-ts-textMuted hover:text-white p-1 rounded-md transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

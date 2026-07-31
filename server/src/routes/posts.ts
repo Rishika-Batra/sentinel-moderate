@@ -50,15 +50,15 @@ router.post('/', requireAuth, upload.single('image'), async (req: AuthedRequest,
       s3Key: key,
     });
 
-    if (process.env.USE_MOCK_SQS === 'true') {
-      console.log('Sending message to Mock SQS Processor:', messageBody);
-      processMockMessage(messageBody).catch(console.error);
-    } else {
-      console.log(`Sending message to real SQS Queue: ${SQS_QUEUE_URL}`);
-      await sqsClient.send(new SendMessageCommand({
+    // Process moderation immediately in background so status is evaluated and updated in MongoDB
+    console.log('Processing post moderation:', messageBody);
+    processMockMessage(messageBody).catch(console.error);
+
+    if (SQS_QUEUE_URL) {
+      sqsClient.send(new SendMessageCommand({
         QueueUrl: SQS_QUEUE_URL,
         MessageBody: messageBody,
-      }));
+      })).catch(err => console.warn('SQS Queue dispatch note:', err.message));
     }
 
     return res.status(201).json(post);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/api';
-import { Clock } from 'lucide-react';
+import { Clock, Inbox } from 'lucide-react';
 
 interface Post {
   _id: string;
@@ -42,40 +42,53 @@ export default function PostFeed({ refreshTrigger }: PostFeedProps) {
   const getStatusBadge = (status: string) => {
     let colorClass = '';
     let dotColor = '';
-    
-    switch (status.toLowerCase()) {
+    let label = status ? status.replace('_', ' ') : 'pending';
+
+    switch (status ? status.toLowerCase() : '') {
+      case 'reviewed':
+      case 'approved':
       case 'clean':
-        colorClass = 'bg-status-clean/10 text-status-clean';
-        dotColor = 'bg-status-clean';
+        colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        dotColor = 'bg-emerald-400';
         break;
-      case 'needs_review':
-        colorClass = 'bg-status-review/10 text-status-review';
-        dotColor = 'bg-status-review';
+      case 'removed':
+        colorClass = 'bg-rose-500/15 text-rose-400 border-rose-500/35';
+        dotColor = 'bg-rose-400';
         break;
       case 'flagged':
-        colorClass = 'bg-status-flagged/10 text-status-flagged';
-        dotColor = 'bg-status-flagged';
+        colorClass = 'bg-red-500/10 text-red-400 border-red-500/30';
+        dotColor = 'bg-red-400';
+        break;
+      case 'needs_review':
+      case 'review':
+        colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        dotColor = 'bg-amber-400';
+        label = 'needs review';
+        break;
+      case 'processing':
+        colorClass = 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        dotColor = 'bg-cyan-400 animate-pulse';
         break;
       case 'pending':
       default:
-        colorClass = 'bg-status-pending/10 text-status-pending';
-        dotColor = 'bg-status-pending';
+        colorClass = 'bg-slate-500/10 text-slate-400 border-slate-500/30';
+        dotColor = 'bg-slate-400';
         break;
     }
-    
+
     return (
-      <div className={`inline-flex items-center px-2 py-1 rounded-full ${colorClass} border border-transparent`}>
+      <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${colorClass} border`}>
         <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotColor}`}></div>
-        <span className="text-[10px] font-semibold uppercase tracking-wider">{status.replace('_', ' ')}</span>
+        <span>{label}</span>
       </div>
     );
   };
 
-  if (loading && posts.length === 0) return <p className="text-ts-text-muted text-sm">Loading posts...</p>;
+  if (loading && posts.length === 0) return <p className="text-ts-textMuted text-sm">Loading posts...</p>;
   
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Recent Submissions</h2>
+      <h2 className="text-lg font-semibold text-ts-textMain mb-4">Recent Submissions</h2>
       
       {error && (
         <div className="bg-red-900/20 py-3 px-4 rounded-lg border border-red-500/30 w-full mb-6">
@@ -84,8 +97,10 @@ export default function PostFeed({ refreshTrigger }: PostFeedProps) {
       )}
 
       {posts.length === 0 && !error ? (
-        <div className="ts-card p-12 text-center border-dashed">
-          <p className="text-ts-text-muted">No items in the queue.</p>
+        <div className="ts-card p-12 text-center flex flex-col items-center justify-center border-dashed">
+          <Inbox className="w-10 h-10 text-ts-textMuted/40 mb-3" />
+          <p className="text-sm font-medium text-ts-textMain">Nothing submitted yet</p>
+          <p className="text-xs text-ts-textMuted mt-1">Submitted content will appear here for review and status tracking.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -96,15 +111,15 @@ export default function PostFeed({ refreshTrigger }: PostFeedProps) {
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center text-ts-text-muted text-xs">
-                  <Clock className="w-3 h-3 mr-1.5" />
+                <div className="flex items-center text-ts-textMuted text-xs">
+                  <Clock className="w-3.5 h-3.5 mr-1.5" />
                   {new Date(post.createdAt).toLocaleString(undefined, { 
                     month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
                   })}
                 </div>
                 {getStatusBadge(post.status)}
               </div>
-              <p className="text-sm text-ts-text-main whitespace-pre-wrap leading-relaxed">{post.text}</p>
+              <p className="text-sm text-ts-textMain whitespace-pre-wrap leading-relaxed">{post.text}</p>
               {post.imageUrl && (
                 <div className="mt-4 rounded-lg overflow-hidden border border-ts-border bg-ts-bg">
                   <img 

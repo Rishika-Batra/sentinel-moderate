@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import AdminPostCard from '../components/AdminPostCard';
+import { CheckCircle2, ShieldAlert } from 'lucide-react';
 
 const AdminQueue = () => {
   const [queue, setQueue] = useState<any[]>([]);
@@ -41,25 +42,28 @@ const AdminQueue = () => {
     <div className="w-full">
       <header className="mb-8 border-b border-ts-border pb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-semibold mb-2">Moderation Queue</h1>
-          <p className="text-sm text-ts-text-muted">Review items flagged by AI processing.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ts-textMain mb-1">Moderation Queue</h1>
+          <p className="text-sm text-ts-textMuted">Review items flagged for manual moderation and decision making.</p>
         </div>
       </header>
 
       {loading ? (
-        <div className="text-ts-text-muted text-sm">Loading queue...</div>
+        <div className="text-ts-textMuted text-sm py-8">Loading queue...</div>
       ) : error ? (
         <div className="bg-red-900/20 py-3 px-4 rounded-lg border border-red-500/30 w-full mb-6">
           <p className="text-red-400 text-sm font-medium">{error}</p>
         </div>
       ) : queue.length === 0 ? (
-        <div className="ts-card p-12 text-center border-dashed">
-          <p className="text-ts-text-muted text-sm">No items in the queue.</p>
+        <div className="ts-card p-12 text-center flex flex-col items-center justify-center border-dashed">
+          <CheckCircle2 className="w-10 h-10 text-status-clean/60 mb-3" />
+          <p className="text-sm font-medium text-ts-textMain">Queue is clear</p>
+          <p className="text-xs text-ts-textMuted mt-1">Nothing submitted yet — flagged content will appear here for review.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="text-xs font-medium text-ts-text-muted uppercase tracking-wider mb-4">
-            Showing {queue.length} items requiring review
+          <div className="flex items-center text-xs font-semibold text-ts-textMuted uppercase tracking-wider mb-4">
+            <ShieldAlert className="w-4 h-4 text-ts-accent mr-2" />
+            Showing {queue.length} {queue.length === 1 ? 'item' : 'items'} requiring review
           </div>
           {queue.map((post, index) => (
             <AdminPostCard 

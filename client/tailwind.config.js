@@ -12,7 +12,7 @@ export default {
           bgGradient: '#12172A',
           surface: '#131826',
           border: '#232B42',
-          accent: '#5B8DEF',
+          accent: '#2DD4BF',
           textMain: '#F1F4F9',
           textMuted: '#9CA6B8',
           textPlaceholder: '#5B6478',
@@ -20,9 +20,14 @@ export default {
         },
         status: {
           clean: '#34D399',
+          reviewed: '#10B981',
+          approved: '#10B981',
           review: '#FBBF24',
+          needs_review: '#FBBF24',
           flagged: '#F87171',
-          pending: '#6B7280',
+          removed: '#F43F5E',
+          pending: '#94A3B8',
+          processing: '#06B6D4',
         }
       },
       fontFamily: {

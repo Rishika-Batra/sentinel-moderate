@@ -28,31 +28,44 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
   const getStatusBadge = (status: string) => {
     let colorClass = '';
     let dotColor = '';
-    
-    switch (status.toLowerCase()) {
+    let label = status ? status.replace('_', ' ') : 'pending';
+
+    switch (status ? status.toLowerCase() : '') {
+      case 'reviewed':
+      case 'approved':
       case 'clean':
-        colorClass = 'bg-status-clean/10 text-status-clean';
-        dotColor = 'bg-status-clean';
+        colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        dotColor = 'bg-emerald-400';
         break;
-      case 'needs_review':
-        colorClass = 'bg-status-review/10 text-status-review';
-        dotColor = 'bg-status-review';
+      case 'removed':
+        colorClass = 'bg-rose-500/15 text-rose-400 border-rose-500/35';
+        dotColor = 'bg-rose-400';
         break;
       case 'flagged':
-        colorClass = 'bg-status-flagged/10 text-status-flagged';
-        dotColor = 'bg-status-flagged';
+        colorClass = 'bg-red-500/10 text-red-400 border-red-500/30';
+        dotColor = 'bg-red-400';
+        break;
+      case 'needs_review':
+      case 'review':
+        colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        dotColor = 'bg-amber-400';
+        label = 'needs review';
+        break;
+      case 'processing':
+        colorClass = 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        dotColor = 'bg-cyan-400 animate-pulse';
         break;
       case 'pending':
       default:
-        colorClass = 'bg-status-pending/10 text-status-pending';
-        dotColor = 'bg-status-pending';
+        colorClass = 'bg-slate-500/10 text-slate-400 border-slate-500/30';
+        dotColor = 'bg-slate-400';
         break;
     }
-    
+
     return (
-      <div className={`inline-flex items-center px-2 py-1 rounded-full ${colorClass} border border-transparent`}>
+      <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${colorClass} border`}>
         <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotColor}`}></div>
-        <span className="text-[10px] font-semibold uppercase tracking-wider">{status.replace('_', ' ')}</span>
+        <span>{label}</span>
       </div>
     );
   };
@@ -65,7 +78,7 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
       <div className="flex justify-between items-start mb-4">
         <div>
           <span className="ts-label !mb-1">Post ID: {post._id}</span>
-          <p className="mt-2 text-sm text-ts-text-main leading-relaxed">{post.text}</p>
+          <p className="mt-2 text-sm text-ts-textMain leading-relaxed">{post.text}</p>
         </div>
         {getStatusBadge(post.status)}
       </div>
@@ -77,16 +90,16 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
       )}
 
       {/* AI Verdict Section */}
-      <div className="bg-ts-input-bg p-4 rounded-lg border border-ts-border mb-5">
-        <h4 className="font-semibold text-sm text-ts-text-main mb-3 flex items-center">
+      <div className="bg-ts-inputBg p-4 rounded-lg border border-ts-border mb-5">
+        <h4 className="font-semibold text-sm text-ts-textMain mb-3 flex items-center">
           <AlertTriangle className="w-4 h-4 mr-2 text-status-review" />
           AI Analysis Details
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-ts-text-muted">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-ts-textMuted">
           {post.aiVerdict?.imageAnalysis?.moderationLabels && (
             <div>
-              <span className="font-medium text-ts-text-main">Image Labels:</span>
+              <span className="font-medium text-ts-textMain">Image Labels:</span>
               <ul className="list-none mt-1 space-y-1">
                 {post.aiVerdict.imageAnalysis.moderationLabels.length > 0 ? (
                   post.aiVerdict.imageAnalysis.moderationLabels.map((l: any, i: number) => (
@@ -103,9 +116,9 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
 
           {post.aiVerdict?.textAnalysis && (
             <div>
-              <span className="font-medium text-ts-text-main">Text Analysis:</span>
+              <span className="font-medium text-ts-textMain">Text Analysis:</span>
               <ul className="list-none mt-1 space-y-1">
-                <li>• Sentiment: <span className="text-ts-text-main">{post.aiVerdict.textAnalysis.sentiment || 'N/A'}</span></li>
+                <li>• Sentiment: <span className="text-ts-textMain">{post.aiVerdict.textAnalysis.sentiment || 'N/A'}</span></li>
                 {post.aiVerdict.textAnalysis.categories?.length > 0 && (
                   <li>• Flags: <span className="text-status-flagged">{post.aiVerdict.textAnalysis.categories.join(', ')}</span></li>
                 )}
@@ -125,7 +138,7 @@ const AdminPostCard = ({ post, onReview, index = 0 }: AdminPostCardProps) => {
         </button>
         <button 
           onClick={() => handleAction('remove')}
-          className="bg-status-flagged text-white font-medium rounded-lg px-6 py-2.5 transition-all duration-150 hover:brightness-110 active:scale-[0.98] flex-1 flex justify-center items-center"
+          className="ts-button-secondary border-status-flagged/30 text-status-flagged hover:bg-status-flagged/10 hover:text-status-flagged hover:border-status-flagged/60 flex-1 flex justify-center items-center"
         >
           <XCircle className="w-4 h-4 mr-2" />
           Remove

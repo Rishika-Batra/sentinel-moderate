@@ -1,5 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { SQSClient } from '@aws-sdk/client-sqs';
+import { ComprehendClient } from '@aws-sdk/client-comprehend';
+import { RekognitionClient } from '@aws-sdk/client-rekognition';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,6 +16,8 @@ const awsConfig = {
 
 export const s3Client = new S3Client(awsConfig);
 export const sqsClient = new SQSClient(awsConfig);
+export const comprehendClient = new ComprehendClient(awsConfig);
+export const rekognitionClient = new RekognitionClient(awsConfig);
 
 export const BUCKET_NAME = process.env.S3_BUCKET_NAME || '';
 export const SQS_QUEUE_URL = process.env.SQS_QUEUE_URL || '';

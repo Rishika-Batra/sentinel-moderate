@@ -6,17 +6,18 @@ const router = Router();
 // GET /api/admin/queue - Fetch flagged & needs_review posts
 router.get('/queue', async (req, res) => {
   try {
-    // Fetch all flagged and needs_review posts
+    // Fetch all posts requiring manual admin moderation
     const posts = await Post.find({
-      status: { $in: ['flagged', 'needs_review'] }
-    }).sort({ createdAt: -1 }); // Sort by newest first
+      status: { $in: ['flagged', 'needs_review', 'pending', 'processing'] }
+    }).sort({ createdAt: -1 });
 
-    // Sort in memory to prioritize 'flagged' items over 'needs_review'
-    // since the queue size is manageable for this demo.
+    // Sort in memory to prioritize 'flagged' items first, then 'needs_review'
     posts.sort((a, b) => {
       if (a.status === 'flagged' && b.status !== 'flagged') return -1;
       if (b.status === 'flagged' && a.status !== 'flagged') return 1;
-      return 0; // fallback to createdAt which is already sorted
+      if (a.status === 'needs_review' && (b.status === 'pending' || b.status === 'processing')) return -1;
+      if (b.status === 'needs_review' && (a.status === 'pending' || a.status === 'processing')) return 1;
+      return 0;
     });
 
     return res.json({ queue: posts });

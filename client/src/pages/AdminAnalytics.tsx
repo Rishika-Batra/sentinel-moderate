@@ -8,7 +8,15 @@ import {
 } from 'recharts';
 import { Activity, Clock, Target, ArrowLeft } from 'lucide-react';
 
-const COLORS = ['#5B8DEF', '#34D399', '#FBBF24', '#F87171', '#9CA6B8', '#6B7280'];
+const STATUS_COLORS: Record<string, string> = {
+  clean: '#34D399',
+  review: '#FBBF24',
+  needs_review: '#FBBF24',
+  flagged: '#F87171',
+  pending: '#6B7280',
+};
+
+const FALLBACK_COLORS = ['#34D399', '#FBBF24', '#F87171', '#6B7280', '#2DD4BF'];
 
 const AdminAnalytics = () => {
   const [data, setData] = useState<any>(null);
@@ -36,8 +44,8 @@ const AdminAnalytics = () => {
     fetchAnalytics();
   }, [navigate]);
 
-  if (loading) return <div className="text-ts-text-muted text-sm pt-8">Loading analytics...</div>;
-  if (!data) return <div className="text-red-400 text-sm pt-8">Failed to load data.</div>;
+  if (loading) return <div className="text-ts-textMuted text-sm py-8">Loading analytics...</div>;
+  if (!data) return <div className="text-red-400 text-sm py-8">Failed to load data.</div>;
 
   const { totalPosts, volumeTrend, categoryBreakdown, aiAccuracy, avgReviewTimeHours } = data;
 
@@ -51,15 +59,17 @@ const AdminAnalytics = () => {
     posts: item.count
   }));
 
-  // Custom tooltips to match dark theme
+  // Custom tooltips matching ts.surface & ts.border
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-ts-input-bg border border-ts-border p-3 rounded-lg shadow-lg">
-          <p className="text-ts-text-main font-medium mb-1">{label}</p>
+        <div className="bg-ts-surface border border-ts-border p-3 rounded-lg">
+          <p className="text-ts-textMain font-semibold text-xs mb-1">
+            {label ? String(label).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : ''}
+          </p>
           {payload.map((p: any, i: number) => (
-            <p key={i} className="text-sm" style={{ color: p.color }}>
-              {p.name}: {p.value}
+            <p key={i} className="text-xs font-medium" style={{ color: p.color || '#2DD4BF' }}>
+              {p.name}: <span className="text-ts-textMain font-semibold">{p.value}</span>
             </p>
           ))}
         </div>
@@ -68,60 +78,108 @@ const AdminAnalytics = () => {
     return null;
   };
 
+  // Custom Legend with colored dots and formatted readable labels
+  const renderCustomLegend = (props: any) => {
+    const { payload } = props;
+    if (!payload) return null;
+    return (
+      <ul className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-4 text-xs">
+        {payload.map((entry: any, index: number) => {
+          const rawLabel = entry.value || '';
+          const formattedLabel = rawLabel
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (c: string) => c.toUpperCase());
+          return (
+            <li key={`legend-${index}`} className="flex items-center space-x-1.5">
+              <span
+                className="w-2.5 h-2.5 rounded-full inline-block"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-ts-textMuted font-medium">{formattedLabel}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
   return (
     <div className="w-full">
       <header className="mb-8 border-b border-ts-border pb-6">
-        <button onClick={() => navigate('/admin/queue')} className="flex items-center text-ts-accent hover:text-white mb-4 text-sm font-medium transition-colors">
+        <button 
+          onClick={() => navigate('/admin/queue')} 
+          className="flex items-center text-ts-accent hover:text-white mb-4 text-sm font-medium transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Queue
         </button>
-        <h1 className="text-2xl font-semibold mb-2">Platform Analytics</h1>
-        <p className="text-sm text-ts-text-muted">Real-time insights into content moderation performance.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ts-textMain mb-1">Platform Analytics</h1>
+        <p className="text-sm text-ts-textMuted">Real-time insights into content moderation performance and category metrics.</p>
       </header>
 
-      {/* Hero Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="ts-card p-6 flex flex-col justify-center items-center text-center animate-fade-slide-up" style={{ animationDelay: '0ms' }}>
-          <Target className="w-8 h-8 text-status-clean mb-3" />
-          <h2 className="ts-label !mb-1 text-ts-text-muted">AI Accuracy Rate</h2>
-          <p className="text-4xl font-semibold text-ts-text-main mt-1">{aiAccuracy ? aiAccuracy.toFixed(1) : 0}%</p>
-          <p className="text-xs text-ts-text-placeholder mt-2">Agreement between Human & AI</p>
+      {/* Hero Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div className="ts-card p-5 flex flex-col justify-between items-start animate-fade-slide-up" style={{ animationDelay: '0ms' }}>
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className="text-[11px] font-medium text-ts-textMuted uppercase tracking-wider">AI Accuracy Rate</span>
+            <Target className="w-5 h-5 text-status-clean" />
+          </div>
+          <div className="text-3xl font-bold text-ts-textMain tracking-tight">
+            {aiAccuracy ? aiAccuracy.toFixed(1) : 0}%
+          </div>
+          <p className="text-xs text-ts-textPlaceholder mt-2">Agreement between Human & AI decisions</p>
         </div>
 
-        <div className="ts-card p-6 flex flex-col justify-center items-center text-center animate-fade-slide-up" style={{ animationDelay: '50ms' }}>
-          <Activity className="w-8 h-8 text-ts-accent mb-3" />
-          <h2 className="ts-label !mb-1 text-ts-text-muted">Total Processed</h2>
-          <p className="text-4xl font-semibold text-ts-text-main mt-1">{totalPosts}</p>
-          <p className="text-xs text-ts-text-placeholder mt-2">All-time posts scanned</p>
+        <div className="ts-card p-5 flex flex-col justify-between items-start animate-fade-slide-up" style={{ animationDelay: '50ms' }}>
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className="text-[11px] font-medium text-ts-textMuted uppercase tracking-wider">Total Processed</span>
+            <Activity className="w-5 h-5 text-ts-accent" />
+          </div>
+          <div className="text-3xl font-bold text-ts-accent tracking-tight">
+            {totalPosts}
+          </div>
+          <p className="text-xs text-ts-textPlaceholder mt-2">All-time posts scanned by system</p>
         </div>
 
-        <div className="ts-card p-6 flex flex-col justify-center items-center text-center animate-fade-slide-up" style={{ animationDelay: '100ms' }}>
-          <Clock className="w-8 h-8 text-status-review mb-3" />
-          <h2 className="ts-label !mb-1 text-ts-text-muted">Avg Review Time</h2>
-          <p className="text-4xl font-semibold text-ts-text-main mt-1">{avgReviewTimeHours ? avgReviewTimeHours.toFixed(1) : 0}h</p>
-          <p className="text-xs text-ts-text-placeholder mt-2">Time from creation to resolution</p>
+        <div className="ts-card p-5 flex flex-col justify-between items-start animate-fade-slide-up" style={{ animationDelay: '100ms' }}>
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className="text-[11px] font-medium text-ts-textMuted uppercase tracking-wider">Avg Review Time</span>
+            <Clock className="w-5 h-5 text-status-review" />
+          </div>
+          <div className="text-3xl font-bold text-ts-textMain tracking-tight">
+            {avgReviewTimeHours ? avgReviewTimeHours.toFixed(1) : 0}h
+          </div>
+          <p className="text-xs text-ts-textPlaceholder mt-2">Time from creation to queue resolution</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="ts-card p-6 col-span-2 animate-fade-slide-up" style={{ animationDelay: '150ms' }}>
-          <h3 className="text-lg font-semibold text-ts-text-main mb-6">Moderation Volume (Last 30 Days)</h3>
+        <div className="ts-card p-5 col-span-2 animate-fade-slide-up" style={{ animationDelay: '150ms' }}>
+          <h3 className="text-base font-semibold text-ts-textMain mb-6">Moderation Volume (Last 30 Days)</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={lineData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#232B42" vertical={false} />
-                <XAxis dataKey="date" tick={{fontSize: 12, fill: '#9CA6B8'}} axisLine={{ stroke: '#232B42' }} tickLine={false} />
-                <YAxis tick={{fontSize: 12, fill: '#9CA6B8'}} axisLine={{ stroke: '#232B42' }} tickLine={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA6B8' }} axisLine={{ stroke: '#232B42' }} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#9CA6B8' }} axisLine={{ stroke: '#232B42' }} tickLine={false} />
                 <RechartsTooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Line type="monotone" dataKey="posts" stroke="#5B8DEF" strokeWidth={3} activeDot={{ r: 6, fill: '#5B8DEF', stroke: '#131826', strokeWidth: 2 }} name="Posts Processed" dot={false} />
+                <Legend wrapperStyle={{ paddingTop: '16px' }} content={renderCustomLegend} />
+                <Line 
+                  type="monotone" 
+                  dataKey="posts" 
+                  stroke="#2DD4BF" 
+                  strokeWidth={2.5} 
+                  activeDot={{ r: 6, fill: '#2DD4BF', stroke: '#131826', strokeWidth: 2 }} 
+                  name="Posts Processed" 
+                  dot={false} 
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="ts-card p-6 animate-fade-slide-up" style={{ animationDelay: '200ms' }}>
-          <h3 className="text-lg font-semibold text-ts-text-main mb-6">Violation Categories</h3>
+        <div className="ts-card p-5 animate-fade-slide-up" style={{ animationDelay: '200ms' }}>
+          <h3 className="text-base font-semibold text-ts-textMain mb-6">Violation Categories</h3>
           <div className="h-80">
             {pieData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -129,23 +187,27 @@ const AdminAnalytics = () => {
                   <Pie
                     data={pieData}
                     cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={2}
+                    cy="45%"
+                    innerRadius={65}
+                    outerRadius={95}
+                    paddingAngle={3}
                     dataKey="value"
                     stroke="none"
                   >
-                    {pieData.map((_entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                    {pieData.map((entry: any, index: number) => {
+                      const key = entry.name?.toLowerCase() || '';
+                      const fillColor = STATUS_COLORS[key] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+                      return <Cell key={`cell-${index}`} fill={fillColor} />;
+                    })}
                   </Pie>
                   <RechartsTooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                  <Legend wrapperStyle={{ paddingTop: '16px' }} content={renderCustomLegend} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-ts-text-muted border border-dashed border-ts-border rounded-lg">No category data yet</div>
+              <div className="h-full flex items-center justify-center text-ts-textMuted text-xs border border-dashed border-ts-border rounded-lg">
+                No category data yet
+              </div>
             )}
           </div>
         </div>
