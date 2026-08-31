@@ -117,4 +117,4 @@ terraform apply -var="mongodb_uri=YOUR_MONGODB_URI"
 
 - **Manual Review Reduction:** Reduced manual review time by __X%__.
 - **AI/Human Agreement Rate:** Achieved a __Y%__ AI accuracy rate (where human admins agreed with the AI's final verdict).
-- **Average Resolution Time:** High-severity content is now processed and alerted within __Z seconds__.
+- **Average Resolution Time:** High-severity content is now processed and alerted within __Z seconds__
