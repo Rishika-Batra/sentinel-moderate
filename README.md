@@ -1,4 +1,4 @@
-# AI Content Moderation Platform
+# AI Content Moderation Platform : Sentinel-Moderate
 
 A full-stack, event-driven content moderation platform that leverages AWS AI services (Rekognition & Comprehend) to automatically analyze user-generated text and image content. Built to reduce manual review overhead by flagging toxic, explicit, or highly negative content in real-time.
 
